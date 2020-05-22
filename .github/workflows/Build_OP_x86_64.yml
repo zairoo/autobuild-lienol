@@ -10,11 +10,11 @@ name: X64-1907
 on:
   release:
     types: [published]
-  push:
-    branches:
-      - master
-    paths:
-      - '.config'
+
+#  push:
+#    branches:
+#      - master
+
 #  schedule:
 #    - cron: 0 8 * * 5
   watch:
@@ -43,53 +43,42 @@ jobs:
         REPO_BRANCH: dev-19.07
       run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
       
-    - name: Clone Config
-      env: 
-        REPO_URL: https://github.com/zairoo/openwrt-actions
-      run: git clone --depth 1 $REPO_URL openwrt-config
-      
-    - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
-
-    - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
+    - name: Update & Install feeds
+      working-directory: ./openwrt
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        ./scripts/feeds install -a
     
-    - name: Custom configure file
+    - name: Configuration Customization - Build_x86_64
+      env:
+        CONFIG_FILE: 'x86_64.config'
       run: |
-          chmod +x custom.sh
-          cd openwrt
-          ../custom.sh
-          rm -f .config
-          cp ../openwrt-config/x64-1907 .config
-          
-    - name: Make Defconfig
+          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+          chmod +x ./customize.sh && ./customize.sh
+          cd openwrt && make defconfig
+
+    - name: Download package
+      working-directory: ./openwrt
       run: |
-          cd openwrt
-          make defconfig
-    - name: Make download
+        make download -j$(nproc)
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+
+    - name: Build firmware
+      working-directory: ./openwrt
       run: |
-          cd openwrt
-          make download -j8
-          find dl -size -1024c -exec ls -l {} \;
-          find dl -size -1024c -exec rm -f {} \;
-    - name: Multi-thread compile
-      run: |
-          cd openwrt
-          echo -e "$(nproc) thread build."
-          make -j$(nproc) V=s
+        echo -e "$(nproc) thread build."
+        make -j$(nproc) V=s
+
     - name: Single-thread compile
       if: failure()
+      working-directory: ./openwrt
       run: |
-          cd openwrt
           make -j1 V=s
-    - name: Assemble artifact
-      run: |
-          rm -rf ./artifact/
-          mkdir -p ./artifact/
-          find openwrt/bin/targets/ -name "*sysupgrade*bin*" | xargs -i mv -f {} ./artifact/
-          find openwrt/bin/targets/ -name "*combined*img*" | xargs -i mv -f {} ./artifact/
-    - name: Upload artifact
+
+    - name : Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: OpenWrt firmware
-        path: ./artifact/
+        name: OpenWrt
+        path: openwrt/bin

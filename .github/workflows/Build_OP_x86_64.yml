@@ -1,11 +1,10 @@
 #=================================================
-# https://github.com/P3TERX/Actions-OpenWrt
 # Description: Build OpenWrt using GitHub Actions
 # Lisence: MIT
-# Author: P3TERX
-# Blog: https://p3terx.com
+# Author: zairoo
 #=================================================
-name: X64-1907
+
+name: Build_x86_64
 
 on:
   release:
@@ -17,6 +16,7 @@ on:
 
 #  schedule:
 #    - cron: 0 8 * * 5
+
   watch:
     types: [started]
 
@@ -50,7 +50,7 @@ jobs:
         ./scripts/feeds install -a
         ./scripts/feeds install -a
     
-    - name: Configuration Customization - Build_x86_64
+    - name: Custom configure file
       env:
         CONFIG_FILE: 'x86_64.config'
       run: |
@@ -70,12 +70,6 @@ jobs:
       run: |
         echo -e "$(nproc) thread build."
         make -j$(nproc) V=s
-
-    - name: Single-thread compile
-      if: failure()
-      working-directory: ./openwrt
-      run: |
-          make -j1 V=s
 
     - name : Upload artifact
       uses: actions/upload-artifact@master

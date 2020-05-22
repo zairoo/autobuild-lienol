@@ -45,7 +45,7 @@ jobs:
       
     - name: Clone Config
       env: 
-        REPO_URL: https://github.com/zhiapp-com/openwrt-actions
+        REPO_URL: https://github.com/zairoo/openwrt-actions
       run: git clone --depth 1 $REPO_URL openwrt-config
       
     - name: Update feeds

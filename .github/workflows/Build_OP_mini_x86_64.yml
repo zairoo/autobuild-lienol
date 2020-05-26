@@ -48,9 +48,7 @@ jobs:
 
     - name: Load custom feeds
       run: |
-        chmod +x ./customize_feeds.sh
-        cd openwrt
-        ../customize_feeds.sh
+        chmod +x ./customize_feeds.sh && ./customize_feeds.sh
 
     - name: Update & Install feeds
       working-directory: ./openwrt

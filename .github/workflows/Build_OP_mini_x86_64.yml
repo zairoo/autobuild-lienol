@@ -46,9 +46,9 @@ jobs:
         REPO_BRANCH: dev-19.07
       run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
 
-    - name: Load custom feeds
-      run: |
-        chmod +x ./customize_feeds.sh && ./customize_feeds.sh
+#     - name: Load custom feeds
+#       run: |
+#         chmod +x ./customize_feeds.sh && ./customize_feeds.sh
 
     - name: Update & Install feeds
       working-directory: ./openwrt

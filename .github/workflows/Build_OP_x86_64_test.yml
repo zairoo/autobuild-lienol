@@ -19,6 +19,9 @@ on:
 
   watch:
     types: [started]
+    
+env:
+  SSH_ACTIONS: false
 
 jobs:
   build:

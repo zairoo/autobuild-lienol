@@ -20,8 +20,6 @@ on:
   watch:
     types: [started]
     
-env:
-  SSH_ACTIONS: false
 
 jobs:
   build:
@@ -68,10 +66,6 @@ jobs:
           chmod +x ./customize.sh && ./customize.sh
           cd openwrt && make defconfig
 
-    - name: SSH connection to Actions
-      uses: zairoo/debugger-action@master
-      if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
-      
     - name: Download package
       working-directory: ./openwrt
       run: |
